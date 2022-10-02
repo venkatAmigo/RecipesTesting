@@ -1,5 +1,6 @@
 package com.example.recipestesting
 
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -7,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
@@ -16,6 +19,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.example.recipestesting.models.*
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
@@ -42,9 +46,16 @@ class MainActivityTest {
             var recipes = mutableListOf<Hit>()
             val recipeOne = Recipe(label = "Chicken", image = "", totalNutrients = TotalNutrients
                 (ENERC_KCAL = NutrientInfo("",0.0,""),FAT=NutrientInfo("",0.0,""),
-                SUGAR = NutrientInfo("",0.0,"")), ingredientLines = listOf("","")
+                SUGAR = NutrientInfo("",0.0,"")), ingredientLines = listOf("1/2 cup of chicken", "1 tablespoon dried oregano")
             )
+            val recipeTwo = Recipe(label = "Pepper Fry", image = "", totalNutrients = TotalNutrients
+                (ENERC_KCAL = NutrientInfo("",0.0,""),FAT=NutrientInfo("",0.0,""),
+                SUGAR = NutrientInfo("",0.0,"")), ingredientLines = listOf("1/2 cup of pepper", "" +
+                    " +"+"1 tablespoon dried pepper")
+            )
+
             recipes.add(Hit(LinksX(Self("","")),recipeOne))
+            recipes.add(Hit(LinksX(Self("","")),recipeTwo))
             it.recipeList = recipes
             it.recipesAdapter = RecipesAdapter(it.recipeList)
             it.recipeRecyclerView.adapter = it.recipesAdapter
@@ -61,8 +72,17 @@ class MainActivityTest {
     }
 
     @Test
-    fun checkItemInRecyclerView(){
+    fun testSearch(){
+        val searchView = onView(withId(R.id.searchView))
+        searchView.perform(typeText("pepper fry")).perform(pressKey(KeyEvent.KEYCODE_ENTER))
+        //On typing check whether only Pepper fry displayed not Chicken
+        onView(withText("Pepper Fry")).check(matches(isDisplayed()))
+        onView(withText("Chicken")).check(doesNotExist())
+    }
 
+    @Test
+    fun checkItemInRecyclerView(){
+        //Cheeking whether given recipe displayed in Recyclerview
         val textView = onView(
             Matchers.allOf(
                 withId(R.id.recipe_name), withText("Chicken"),
@@ -71,7 +91,6 @@ class MainActivityTest {
             )
         )
         textView.check(matches(withText("Chicken")))
-
     }
 
     @Test
@@ -91,6 +110,20 @@ class MainActivityTest {
                 ViewActions.click()
             )
         )
+        //Checking whether clicking on recipe navigating and showing ingredients
+        val textView = onView(
+            Matchers.allOf(
+                withId(android.R.id.text1), withText("1/2 cup of chicken"),
+                withParent(
+                    Matchers.allOf(
+                        withId(R.id.ingredients_list),
+                        withParent(IsInstanceOf.instanceOf(ViewGroup::class.java))
+                    )
+                ),
+                isDisplayed()
+            )
+        )
+        textView.check(matches(withText("1/2 cup of chicken")))
 
     }
     private fun childAtPosition(

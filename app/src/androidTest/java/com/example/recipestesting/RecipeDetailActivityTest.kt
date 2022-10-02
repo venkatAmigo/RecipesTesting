@@ -1,9 +1,6 @@
 package com.example.recipestesting
 
-import android.content.Intent
-import android.util.Log
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -11,10 +8,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.example.recipestesting.models.*
+import com.example.recipestesting.models.NutrientInfo
+import com.example.recipestesting.models.Recipe
+import com.example.recipestesting.models.TotalNutrients
 import org.hamcrest.Matchers
-import org.junit.Assert.*
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -30,45 +27,44 @@ class RecipeDetailActivityTest {
     var mActivityScenarioRule = ActivityScenarioRule(RecipeDetailActivity::class.java)
 
     lateinit var activity: RecipeDetailActivity
+
     @Before
     fun setUp() {
         val recipeOne = Recipe(
             label = "Chicken Roast", image = "", totalNutrients = TotalNutrients
                 (
-                ENERC_KCAL = NutrientInfo("Energy", 1.0, "mg"), FAT = NutrientInfo("Fat", 2.0,
-                "mg"),
+                ENERC_KCAL = NutrientInfo("Energy", 1.0, "mg"), FAT = NutrientInfo(
+                "Fat", 2.0,
+                "mg"
+            ),
                 SUGAR = NutrientInfo("Sugar", 3.0, "mg")
             ), ingredientLines = listOf("1/2 cup of chicken", "1 tablespoon dried oregano")
         )
         mActivityScenarioRule.scenario.onActivity {
-            /*val intent = Intent()
-            intent.putExtra("RECIPE",recipeOne)
-            it.intent = intent*/
             activity = it
             it.recipe = recipeOne
         }
     }
 
     @Test
-    fun checkWhatsappShareButtonDisplayed(){
+    fun checkWhatsappShareButtonDisplayed() {
         val imageButton = onView(
-           Matchers.allOf(
-               ViewMatchers.withId(R.id.fab),
-               ViewMatchers.isDisplayed()
-           )
-       )
-       imageButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        onView(withText("1/2 cup of chicken")).check(matches(isDisplayed()))
+            Matchers.allOf(
+                ViewMatchers.withId(R.id.fab),
+                isDisplayed()
+            )
+        )
+        imageButton.check(matches(isDisplayed()))
     }
 
     @Test
-    fun checkIngredientsDisplayed(){
+    fun checkIngredientsDisplayed() {
         onView(withText("1/2 cup of chicken")).check(matches(isDisplayed()))
         onView(withText("1 tablespoon dried oregano")).check(matches(isDisplayed()))
     }
 
     @Test
-    fun checkNutrientsDisplayed(){
+    fun checkNutrientsDisplayed() {
         onView(withText("Energy, 1.0 mg")).check(matches(isDisplayed()))
         onView(withText("Fat, 2.0 mg")).check(matches(isDisplayed()))
         onView(withText("Sugar, 3.0 mg")).check(matches(isDisplayed()))
